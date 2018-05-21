@@ -6,7 +6,6 @@ services:
     image: prom/prometheus
     volumes:
       - ./prometheus:/etc/prometheus/
-      - /tmp/prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     ports:
