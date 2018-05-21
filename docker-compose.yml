@@ -1,0 +1,70 @@
+version: "2.1"
+services:
+
+  prometheus-server:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus/
+      - /tmp/prometheus:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - 9090:9090
+    links:
+      - cadvisor:cadvisor
+      - node-exporter:node-exporter
+    restart: always
+    networks:
+      - docker-test
+    restart: always
+
+  node-exporter:
+    container_name: node-exporter
+    image: prom/node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command: 
+      - '--path.procfs=/host/proc' 
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 9100:9100
+    networks:
+      - docker-test
+    restart: always
+
+  cadvisor:
+    container_name: cadvisor
+    image: google/cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8080:8080
+    networks:
+      - docker-test
+    restart: always
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    ports: 
+      - 3000:3000
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    restart: always
+    networks: 
+      - docker-test
+
+networks:
+  docker-test:
+    ipam:
+      driver: default
+      config:
+      - subnet: 10.100.0.0/16
