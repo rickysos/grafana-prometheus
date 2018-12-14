@@ -28,3 +28,8 @@ scrape_configs:
     - targets: ["prometheus:9090"]
       labels:
         group: 'dev'
+  - job_name: "promtail"
+    static_configs:
+    - targets: ["loki:3100"]
+      labels:
+        group: 'dev'

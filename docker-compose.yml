@@ -1,5 +1,29 @@
-version: "2.1"
+version: "3"
+
+networks:
+  loki:
+
 services:
+
+  loki:
+    image: grafana/loki:master
+    ports:
+      - "3100:3100"
+    volumes:
+      - $PWD:/etc/loki
+    command: -config.file=/etc/loki/loki-local-config.yaml
+    networks:
+      - loki
+
+  promtail:
+    image: grafana/promtail:make-images-static-26a87c9
+    volumes:
+      - $PWD:/etc/promtail
+      - /var/log:/var/log
+    command:
+      -config.file=/etc/promtail/promtail-docker-config.yaml
+    networks:
+      - loki
 
   prometheus-server:
     container_name: prometheus
@@ -15,7 +39,7 @@ services:
       - node-exporter:node-exporter
     restart: always
     networks:
-      - docker-test
+      - loki
     restart: always
 
   node-exporter:
@@ -33,7 +57,7 @@ services:
     ports:
       - 9100:9100
     networks:
-      - docker-test
+      - loki
     restart: always
 
   cadvisor:
@@ -47,23 +71,19 @@ services:
     ports:
       - 8080:8080
     networks:
-      - docker-test
+      - loki
     restart: always
 
   grafana:
     container_name: grafana
-    image: grafana/grafana
+    image: grafana/grafana:master
     ports: 
       - 3000:3000
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
     restart: always
+    environment:
+      GF_EXPLORE_ENABLED: "true"
     networks: 
-      - docker-test
+      - loki
 
-networks:
-  docker-test:
-    ipam:
-      driver: default
-      config:
-      - subnet: 10.100.0.0/16
