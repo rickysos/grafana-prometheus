@@ -13,6 +13,7 @@ docker-compose down
 
 ## Grafana Datasources and Dashboards
 Grafana default username and password admin/admin
+
 If you would like to automate the installation of additional dashboards just copy the Dashboard `JSON` file to `grafana/provisioning/dashboards` and it will be provisioned next time you stop and start Grafana or the docker-compose stack.
 
 ## Prometheus
